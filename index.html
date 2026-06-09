@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Laboratorio de Lógica Colaborativo | Registro de Edades</title>
+    <style>
+        /* ============================================================
+           VARIABLES GLOBALES & CONFIGURACIÓN MOBILE-FIRST
+           ============================================================ */
+        :root {
+            --fondo: #f8fafc;
+            --superficie: #ffffff;
+            --texto-primario: #1e293b;
+            --texto-secundario: #475569;
+            --texto-terciario: #64748b;
+            --borde: #e2e8f0;
+            --borde-focus: #818cf8;
+            --primario: #6366f1;
+            --primario-hover: #4f46e5;
+            --primario-claro: #eef2ff;
+            --verde: #10b981;
+            --verde-claro: #ecfdf5;
+            --verde-oscuro: #065f46;
+            --rojo: #ef4444;
+            --rojo-claro: #fef2f2;
+            --rojo-oscuro: #991b1b;
+            --ambar: #f59e0b;
+            --ambar-claro: #fffbeb;
+            --ambar-oscuro: #92400e;
+            --gris-calido: #f1f5f9;
+            --sombra-tarjeta: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --sombra-boton: 0 6px 18px rgba(99, 102, 241, 0.25);
+            --radio-grande: 20px;
+            --radio-medio: 14px;
+            --radio-chico: 10px;
+            --fuente: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            --tamano-touch: 50px; /* Tamaño mínimo para touch targets (48px + margen) */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--fuente);
+            background: linear-gradient(165deg, #f1f5f9 0%, #eef2ff 30%, #f8fafc 70%, #f1f5f9 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 12px;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ============================================================
+           CONTENEDOR PRINCIPAL - DISEÑO VERTICAL MOBILE-FIRST
+           ============================================================ */
+        .laboratorio {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding-bottom: 20px;
+        }
+
+        /* ============================================================
+           CABECERA
+           ============================================================ */
+        .cabecera {
+            text-align: center;
+            padding: 8px 0;
+        }
+        .cabecera h1 {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--texto-primario);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .cabecera .icono-titulo {
+            font-size: 2rem;
+        }
+        .cabecera .subtitulo {
+            font-size: 0.82rem;
+            color: var(--texto-terciario);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        /* ============================================================
+           TARJETA BASE REUTILIZABLE
+           ============================================================ */
+        .tarjeta {
+            background: var(--superficie);
+            border-radius: var(--radio-grande);
+            padding: 18px 16px;
+            box-shadow: var(--sombra-tarjeta);
+            border: 1px solid var(--borde);
+        }
+
+        /* ============================================================
+           FORMULARIO DE ENTRADA
+           ============================================================ */
+        .formulario {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .etiqueta-input {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--texto-primario);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .contenedor-input {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+        .campo-edad {
+            flex: 1;
+            padding: 0 16px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border: 2.5px solid var(--borde);
+            border-radius: var(--radio-medio);
+            outline: none;
+            background: #f9fafb;
+            color: var(--texto-primario);
+            transition: all 0.2s ease;
+            min-height: var(--tamano-touch);
+            font-family: var(--fuente);
+            letter-spacing: 0.3px;
+        }
+        .campo-edad:focus {
+            border-color: var(--borde-focus);
+            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.1);
+            background: #fff;
+        }
+        .campo-edad.estado-ok {
+            border-color: var(--verde);
+            background: var(--verde-claro);
+            color: var(--verde-oscuro);
+        }
+        .campo-edad.estado-error {
+            border-color: var(--rojo);
+            background: var(--rojo-claro);
+            color: var(--rojo-oscuro);
+            animation: sacudida 0.45s ease;
+        }
+        @keyframes sacudida {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            15% {
+                transform: translateX(-6px);
+            }
+            30% {
+                transform: translateX(6px);
+            }
+            45% {
+                transform: translateX(-5px);
+            }
+            60% {
+                transform: translateX(4px);
+            }
+            75% {
+                transform: translateX(-2px);
+            }
+            90% {
+                transform: translateX(2px);
+            }
+        }
+
+        .btn-registrar {
+            background: var(--primario);
+            color: #fff;
+            border: none;
+            border-radius: var(--radio-medio);
+            padding: 0 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            min-height: var(--tamano-touch);
+            min-width: var(--tamano-touch);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            box-shadow: var(--sombra-boton);
+            white-space: nowrap;
+            font-family: var(--fuente);
+            letter-spacing: 0.2px;
+        }
+        .btn-registrar:active {
+            transform: scale(0.94);
+            background: var(--primario-hover);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+        .btn-registrar:hover {
+            background: var(--primario-hover);
+        }
+
+        /* Feedback inline debajo del formulario */
+        .feedback-inline {
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 10px 14px;
+            border-radius: var(--radio-chico);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            line-height: 1.4;
+        }
+        .feedback-inline.neutro {
+            background: var(--gris-calido);
+            color: var(--texto-terciario);
+            border: 2px dashed var(--borde);
+        }
+        .feedback-inline.exito {
+            background: var(--verde-claro);
+            color: var(--verde-oscuro);
+            border: 2px solid var(--verde);
+        }
+        .feedback-inline.fallo {
+            background: var(--rojo-claro);
+            color: var(--rojo-oscuro);
+            border: 2px solid var(--rojo);
+        }
+
+        /* ============================================================
+           PANEL DE ESTADÍSTICAS (AGREGADOS)
+           ============================================================ */
+        .estadisticas {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .tarjeta-estadistica {
+            flex: 1 1 120px;
+            background: var(--superficie);
+            border-radius: var(--radio-medio);
+            padding: 14px 12px;
+            text-align: center;
+            box-shadow: var(--sombra-tarjeta);
+            border: 1px solid var(--borde);
+            min-width: 100px;
+        }
+        .tarjeta-estadistica .valor-estadistica {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--primario);
+            letter-spacing: -0.5px;
+        }
+        .tarjeta-estadistica .etiqueta-estadistica {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--texto-terciario);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-top: 2px;
+        }
+        .tarjeta-estadistica .contador {
+            font-size: 0.75rem;
+            color: var(--texto-secundario);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* ============================================================
+           REGLAS ACTIVAS (CONSOLA DE ESTADO)
+           ============================================================ */
+        .reglas-lista {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .reglas-lista li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--texto-secundario);
+            padding: 6px 0;
+        }
+        .reglas-lista .icono-regla {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* ============================================================
+           TABLA DE HISTORIAL
+           ============================================================ */
+        .contenedor-tabla {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: var(--radio-chico);
+            border: 1px solid var(--borde);
+        }
+        .tabla-historial {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            min-width: 440px;
+        }
+        .tabla-historial thead th {
+            background: #f8fafc;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--texto-secundario);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--borde);
+            position: sticky;
+            top: 0;
+        }
+        .tabla-historial tbody td {
+            padding: 9px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--texto-primario);
+            font-weight: 500;
+        }
+        .tabla-historial tbody tr:hover td {
+            background: #fafbff;
+        }
+        .celda-vacia {
+            text-align: center;
+            color: #cbd5e1;
+            font-style: italic;
+            padding: 20px !important;
+        }
+        .badge-exito,
+        .badge-error {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+        .badge-exito {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .badge-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .razon-tecnica {
+            font-size: 0.72rem;
+            color: var(--texto-terciario);
+            font-style: italic;
+        }
+
+        /* ============================================================
+           MENSAJE EDUCATIVO FINAL
+           ============================================================ */
+        .mensaje-educativo {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--texto-terciario);
+            padding: 8px;
+            line-height: 1.5;
+        }
+        .mensaje-educativo strong {
+            color: var(--texto-secundario);
+        }
+
+        /* ============================================================
+           RESPONSIVE - PANTALLAS MÁS GRANDES
+           ============================================================ */
+        @media (min-width: 600px) {
+            body {
+                padding: 20px;
+                align-items: center;
+            }
+            .laboratorio {
+                gap: 16px;
+            }
+            .tarjeta {
+                padding: 22px 20px;
+            }
+            .btn-registrar {
+                font-size: 1rem;
+            }
+            .campo-edad {
+                font-size: 1.1rem;
+            }
+            .cabecera h1 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="laboratorio">
+        <!-- ==================== CABECERA ==================== -->
+        <div class="cabecera">
+            <h1>
+                <span class="icono-titulo">🧪</span> Laboratorio de Lógica
+            </h1>
+            <p class="subtitulo">Registro colaborativo de edades · Análisis en tiempo real</p>
+        </div>
+
+        <!-- ==================== FORMULARIO DE ENTRADA ==================== -->
+        <div class="tarjeta formulario">
+            <label class="etiqueta-input" for="edadInput">
+                📝 Ingresa una edad:
+            </label>
+            <div class="contenedor-input">
+                <input
+                    type="text"
+                    id="edadInput"
+                    class="campo-edad"
+                    placeholder="Ej: 15, 25.5, 30..."
+                    autocomplete="off"
+                    inputmode="decimal"
+                    aria-label="Edad del alumno"
+                >
+                <button class="btn-registrar" id="btnRegistrar" aria-label="Registrar edad">
+                    ➕ Registrar
+                </button>
+            </div>
+            <div class="feedback-inline neutro" id="feedbackInline" aria-live="polite">
+                💡 Esperando tu primer registro...
+            </div>
+        </div>
+
+        <!-- ==================== PANEL DE ESTADÍSTICAS ==================== -->
+        <div class="estadisticas" id="panelEstadisticas">
+            <div class="tarjeta-estadistica">
+                <div class="valor-estadistica" id="contadorRegistros">0</div>
+                <div class="etiqueta-estadistica">📋 Registros</div>
+                <div class="contador">válidos</div>
+            </div>
+            <div class="tarjeta-estadistica">
+                <div class="valor-estadistica" id="sumaTotal">0</div>
+                <div class="etiqueta-estadistica">➕ Suma total</div>
+                <div class="contador">acumulada</div>
+            </div>
+            <div class="tarjeta-estadistica">
+                <div class="valor-estadistica" id="promedioEdad">—</div>
+                <div class="etiqueta-estadistica">📊 Promedio</div>
+                <div class="contador">edad media</div>
+            </div>
+        </div>
+
+        <!-- ==================== REGLAS ACTIVAS ==================== -->
+        <div class="tarjeta">
+            <h3 style="font-size:0.9rem; font-weight:700; color:var(--texto-primario); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                📋 Estado del Sistema · Reglas Activas
+            </h3>
+            <ul class="reglas-lista">
+                <li>
+                    <span class="icono-regla">1</span>
+                    <span><strong>Debe ser un número</strong> — sin letras ni símbolos</span>
+                </li>
+                <li>
+                    <span class="icono-regla">2</span>
+                    <span><strong>Debe ser positivo</strong> — mayor que 0</span>
+                </li>
+                <li>
+                    <span class="icono-regla">3</span>
+                    <span><strong>No puede estar vacío</strong> — ni contener solo espacios</span>
+                </li>
+                <li>
+                    <span class="icono-regla">✓</span>
+                    <span>Se permiten <strong>decimales</strong> (ej: 15.5, 20.75)</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- ==================== TABLA DE HISTORIAL ==================== -->
+        <div class="tarjeta">
+            <h3 style="font-size:0.9rem; font-weight:700; color:var(--texto-primario); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                📜 Historial de Pruebas (Log)
+            </h3>
+            <div class="contenedor-tabla">
+                <table class="tabla-historial" id="tablaHistorial">
+                    <thead>
+                        <tr>
+                            <th>Intento #</th>
+                            <th>Valor ingresado</th>
+                            <th>Resultado</th>
+                            <th>Razón técnica</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTabla">
+                        <tr>
+                            <td colspan="4" class="celda-vacia">
+                                📭 Aún no hay registros. ¡Comienza a experimentar!
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ==================== MENSAJE EDUCATIVO ==================== -->
+        <div class="mensaje-educativo">
+            <strong>🧠 Pensamiento computacional:</strong> Observa cómo el sistema distingue entre datos válidos e inválidos.
+            <br>La <strong>suma</strong> y el <strong>promedio</strong> solo se calculan con los valores aceptados.
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // REFERENCIAS A ELEMENTOS DEL DOM
+        // ============================================================
+        const campoEdad = document.getElementById('edadInput');
+        const btnRegistrar = document.getElementById('btnRegistrar');
+        const feedbackInline = document.getElementById('feedbackInline');
+        const cuerpoTabla = document.getElementById('cuerpoTabla');
+        const contadorRegistros = document.getElementById('contadorRegistros');
+        const sumaTotal = document.getElementById('sumaTotal');
+        const promedioEdad = document.getElementById('promedioEdad');
+
+        // ============================================================
+        // VARIABLES DE ESTADO
+        // ============================================================
+        let contadorIntentos = 0; // Contador global de intentos (incluye fallidos)
+        const edadesValidadas = []; // Array que almacena SOLO las edades aceptadas (números positivos)
+
+        // ============================================================
+        // FUNCIÓN DE VALIDACIÓN MEJORADA
+        // Devuelve un objeto con: valido, mensaje (para el usuario),
+        // razonTecnica (para el historial)
+        // ============================================================
+        function validarEdad(texto) {
+            const valorLimpio = texto.trim();
+
+            // --- CASO 1: Campo vacío o solo espacios ---
+            if (valorLimpio === '') {
+                return {
+                    valido: false,
+                    mensaje: '⚠️ El campo está vacío. Debes ingresar un número positivo.',
+                    razonTecnica: 'Campo vacío o solo espacios en blanco'
+                };
+            }
+
+            // --- CASO 2: Detección de caracteres no numéricos ---
+            // Expresión regular que acepta números positivos con decimal opcional
+            const regexNumeroValido = /^[+]?(\d+(\.\d*)?|\.\d+)$/;
+
+            if (!regexNumeroValido.test(valorLimpio)) {
+                // Determinamos qué tipo de caracteres inválidos contiene
+                const tieneLetras = /[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/.test(valorLimpio);
+                const tieneSimbolos = /[!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?]/.test(valorLimpio);
+
+                let razon = 'Contiene caracteres no numéricos';
+                if (tieneLetras && tieneSimbolos) {
+                    razon = 'Contiene letras y símbolos especiales';
+                } else if (tieneLetras) {
+                    razon = 'Contiene letras (caracteres alfabéticos)';
+                } else if (tieneSimbolos) {
+                    razon = 'Contiene símbolos o caracteres especiales';
+                } else if (valorLimpio.includes(' ')) {
+                    razon = 'Contiene espacios en medio del texto';
+                }
+
+                return {
+                    valido: false,
+                    mensaje: '❌ Se detectaron caracteres no numéricos. Solo se permiten dígitos y punto decimal.',
+                    razonTecnica: razon
+                };
+            }
+
+            // --- CASO 3: Convertir a número y verificar ---
+            const numero = parseFloat(valorLimpio);
+
+            if (isNaN(numero)) {
+                return {
+                    valido: false,
+                    mensaje: '❌ El formato no es reconocible como número.',
+                    razonTecnica: 'La conversión a número falló (NaN)'
+                };
+            }
+
+            // --- CASO 4: Número negativo ---
+            if (numero < 0) {
+                return {
+                    valido: false,
+                    mensaje: '❌ El número es negativo. La edad debe ser un valor positivo.',
+                    razonTecnica: 'El valor ingresado es un número negativo'
+                };
+            }
+
+            // --- CASO 5: Exactamente cero ---
+            if (numero === 0) {
+                return {
+                    valido: false,
+                    mensaje: '❌ Ingresaste cero. La edad debe ser mayor que 0.',
+                    razonTecnica: 'El valor es exactamente 0 (no se permite cero)'
+                };
+            }
+
+            // --- CASO 6: ÉXITO ---
+            return {
+                valido: true,
+                mensaje: '✅ Dato aceptado. La edad ' + numero + ' es válida.',
+                razonTecnica: 'Número positivo válido (mayor que 0)'
+            };
+        }
+
+        // ============================================================
+        // FUNCIÓN PARA ACTUALIZAR LA INTERFAZ VISUAL
+        // ============================================================
+        function actualizarFeedback(esValido, mensaje) {
+            // Limpiar clases anteriores
+            campoEdad.classList.remove('estado-ok', 'estado-error');
+            feedbackInline.classList.remove('exito', 'fallo', 'neutro');
+
+            if (esValido) {
+                campoEdad.classList.add('estado-ok');
+                feedbackInline.classList.add('exito');
+            } else {
+                campoEdad.classList.add('estado-error');
+                feedbackInline.classList.add('fallo');
+            }
+
+            feedbackInline.textContent = mensaje;
+        }
+
+        // ============================================================
+        // FUNCIÓN PARA AGREGAR REGISTRO AL HISTORIAL
+        // ============================================================
+        function agregarAlHistorial(valorIngresado, esValido, razonTecnica) {
+            contadorIntentos++;
+
+            // Si es el primer registro, eliminar la fila de "vacío"
+            if (contadorIntentos === 1) {
+                cuerpoTabla.innerHTML = '';
+            }
+
+            const fila = document.createElement('tr');
+
+            // Columna: Intento #
+            const tdIntento = document.createElement('td');
+            tdIntento.textContent = '#' + contadorIntentos;
+            tdIntento.style.fontWeight = '700';
+            fila.appendChild(tdIntento);
+
+            // Columna: Valor ingresado
+            const tdValor = document.createElement('td');
+            const valorMostrado = valorIngresado.trim() === '' ? '(vacío)' : valorIngresado;
+            tdValor.textContent = valorMostrado;
+            tdValor.style.fontFamily = 'monospace';
+            tdValor.style.fontWeight = '600';
+            fila.appendChild(tdValor);
+
+            // Columna: Resultado (badge)
+            const tdResultado = document.createElement('td');
+            const badge = document.createElement('span');
+            if (esValido) {
+                badge.textContent = '✅ Éxito';
+                badge.className = 'badge-exito';
+            } else {
+                badge.textContent = '❌ Error';
+                badge.className = 'badge-error';
+            }
+            tdResultado.appendChild(badge);
+            fila.appendChild(tdResultado);
+
+            // Columna: Razón técnica
+            const tdRazon = document.createElement('td');
+            tdRazon.textContent = razonTecnica;
+            tdRazon.className = 'razon-tecnica';
+            fila.appendChild(tdRazon);
+
+            // Insertar al principio (lo más reciente arriba)
+            cuerpoTabla.insertBefore(fila, cuerpoTabla.firstChild);
+
+            // Limitar a 25 registros para mantener la interfaz limpia
+            if (cuerpoTabla.children.length > 25) {
+                cuerpoTabla.removeChild(cuerpoTabla.lastChild);
+            }
+        }
+
+        // ============================================================
+        // FUNCIÓN PARA ACTUALIZAR ESTADÍSTICAS (AGREGADOS)
+        // Usa Array.reduce() para calcular suma y promedio
+        // ============================================================
+        function actualizarEstadisticas() {
+            const totalRegistros = edadesValidadas.length;
+            contadorRegistros.textContent = totalRegistros;
+
+            if (totalRegistros === 0) {
+                sumaTotal.textContent = '0';
+                promedioEdad.textContent = '—';
+                return;
+            }
+
+            // Usamos Array.reduce() para calcular la suma total
+            const suma = edadesValidadas.reduce((acumulador, valorActual) => {
+                return acumulador + valorActual;
+            }, 0);
+
+            // Calculamos el promedio
+            const promedio = suma / totalRegistros;
+
+            // Mostramos con 2 decimales para precisión estadística
+            sumaTotal.textContent = suma % 1 === 0 ? suma.toFixed(0) : suma.toFixed(2);
+            promedioEdad.textContent = promedio.toFixed(2);
+
+            // Pequeño detalle: si el promedio es exacto, mostramos sin decimales
+            if (promedio % 1 === 0) {
+                promedioEdad.textContent = promedio.toFixed(0);
+            }
+        }
+
+        // ============================================================
+        // FUNCIÓN PRINCIPAL: REGISTRAR EDAD
+        // ============================================================
+        function registrarEdad() {
+            const textoIngresado = campoEdad.value;
+            const resultado = validarEdad(textoIngresado);
+
+            // Actualizar la interfaz visual (campo + feedback)
+            actualizarFeedback(resultado.valido, resultado.mensaje);
+
+            // Agregar al historial
+            agregarAlHistorial(textoIngresado, resultado.valido, resultado.razonTecnica);
+
+            // Si el dato es válido, agregarlo al array de edades validadas
+            // (Array.push()) y actualizar estadísticas
+            if (resultado.valido) {
+                const numeroValido = parseFloat(textoIngresado.trim());
+                edadesValidadas.push(numeroValido); // Usamos Array.push()
+                actualizarEstadisticas();
+
+                // Limpiar el campo después de un registro exitoso
+                campoEdad.value = '';
+                campoEdad.classList.remove('estado-ok');
+                // Pequeño feedback adicional
+                setTimeout(() => {
+                    if (feedbackInline.classList.contains('exito')) {
+                        feedbackInline.classList.remove('exito');
+                        feedbackInline.classList.add('neutro');
+                        feedbackInline.textContent = '💡 ¡Sigue experimentando! Registra otra edad.';
+                    }
+                }, 1800);
+            }
+
+            // Mantener el foco en el campo de entrada para agilizar pruebas consecutivas
+            campoEdad.focus();
+        }
+
+        // ============================================================
+        // FUNCIÓN PARA LIMPIAR ESTILOS AL EDITAR
+        // ============================================================
+        function limpiarEstilos() {
+            campoEdad.classList.remove('estado-ok', 'estado-error');
+            feedbackInline.classList.remove('exito', 'fallo');
+            feedbackInline.classList.add('neutro');
+            feedbackInline.textContent = '💡 Esperando tu registro...';
+        }
+
+        // ============================================================
+        // ASIGNACIÓN DE EVENTOS
+        // ============================================================
+        btnRegistrar.addEventListener('click', registrarEdad);
+
+        // Permitir usar la tecla Enter para registrar
+        campoEdad.addEventListener('keypress', (evento) => {
+            if (evento.key === 'Enter') {
+                evento.preventDefault();
+                registrarEdad();
+            }
+        });
+
+        // Limpiar estilos cuando el usuario modifica el campo
+        campoEdad.addEventListener('input', limpiarEstilos);
+
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        // Colocar el foco en el campo de entrada al cargar la página
+        campoEdad.focus();
+
+        // Mensaje en consola para los alumnos curiosos
+        console.log(
+            '🧪 ¡Bienvenido al Laboratorio de Lógica Colaborativo!\n\n' +
+            '🎯 OBJETIVO: Registra edades y observa cómo el sistema valida cada entrada.\n\n' +
+            '📋 REGLAS:\n' +
+            '  1. El valor debe ser un número (sin letras ni símbolos).\n' +
+            '  2. Debe ser mayor que 0 (positivo estricto).\n' +
+            '  3. No puede estar vacío.\n\n' +
+            '📊 ESTADÍSTICAS: El sistema calcula automáticamente la suma y el promedio\n' +
+            '   de todas las edades válidas usando Array.reduce().\n\n' +
+            '📜 HISTORIAL: Cada intento queda registrado con su razón técnica.\n' +
+            '   ¡Así puedes analizar patrones de error!\n\n' +
+            '💡 CONSEJO: Prueba con letras, números negativos, cero y decimales.\n' +
+            '   Observa cómo reacciona el sistema en cada caso.'
+        );
+    </script>
+</body>
+</html>
